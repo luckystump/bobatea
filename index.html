@@ -523,34 +523,44 @@
     showPage('page3', true);
   }
 
-  async function sendEmail() {
-    const btn = document.getElementById('sendItBtn');
-    btn.disabled = true;
-    btn.textContent = '📨 Sending...';
+async function sendEmail() {
+  const btn = document.getElementById('sendItBtn');
 
-    const tops = order.toppings.length ? order.toppings.map(t => t.name).join(', ') : 'None';
-    const notes = document.getElementById('notes').value.trim();
-    const sugar = order.sugar || '0% – No Sugar';
-    const ice = order.ice || 'Regular Ice';
-    const orderText = 'Name: ' + currentName + '\nTea: ' + order.tea + '\nSugar: ' + sugar + '\nIce: ' + ice + '\nToppings: ' + tops + (notes ? '\nNotes: ' + notes : '');
+  // 🔒 stop spam clicks immediately
+  if (btn.disabled) return;
+  btn.disabled = true;
+  btn.textContent = '📨 Sending...';
 
-    try {
-      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-        to_email: TO_EMAIL,
-        order_list: orderText,
-        order_count: 1,
-        timestamp: new Date().toLocaleString()
-      });
-      showToast('📧 Order sent!');
-    } catch (err) {
-      const body = encodeURIComponent(orderText);
-      window.open('mailto:' + TO_EMAIL + '?subject=Boba Order – ' + currentName + '&body=' + body);
-      showToast('📬 Opening your email app...');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Send it 🧋';
-    }
+  const tops = order.toppings.length ? order.toppings.map(t => t.name).join(', ') : 'None';
+  const notes = document.getElementById('notes').value.trim();
+  const sugar = order.sugar || '0% – No Sugar';
+  const ice = order.ice || 'Regular Ice';
+
+  const orderText =
+    'Name: ' + currentName +
+    '\nTea: ' + order.tea +
+    '\nSugar: ' + sugar +
+    '\nIce: ' + ice +
+    '\nToppings: ' + tops +
+    (notes ? '\nNotes: ' + notes : '');
+
+  try {
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      to_email: TO_EMAIL,
+      order_list: orderText,
+      order_count: 1,
+      timestamp: new Date().toLocaleString()
+    });
+
+    // ✅ GO TO THANK YOU PAGE
+    showThankYouPage();
+
+  } catch (err) {
+    showToast('❌ Failed to send');
+    btn.disabled = false;
+    btn.textContent = 'Send it 🧋';
   }
+}
 
   function startOver() {
     order = { tea: null, isMilkTea: null, sugar: null, ice: null, toppings: [] };
