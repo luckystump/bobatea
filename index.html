@@ -350,7 +350,8 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
+*************************
+  <script>
   const EMAILJS_PUBLIC_KEY  = 'C6luRv7ZLzZemAnpB';
   const EMAILJS_SERVICE_ID  = 'service_o60r21k';
   const EMAILJS_TEMPLATE_ID = 'template_yhl7a6m';
@@ -389,34 +390,36 @@
   nameInput.addEventListener('input', () => {
     startBtn.classList.toggle('ready', nameInput.value.trim().length > 0);
   });
+
   nameInput.addEventListener('keydown', e => {
     if (e.key === 'Enter' && nameInput.value.trim()) goToOrder();
   });
 
   // If name already saved, skip straight to order page
+  const savedName = localStorage.getItem('bobaName');
 
-const savedName = localStorage.getItem('bobaName');
+  if (savedName) {
+    currentName = savedName;
+    document.getElementById('greetingChip').textContent = '👤 ' + currentName;
+    document.getElementById('sumName').textContent = currentName;
+    showPage('page2', false);
+  } else {
+    document.getElementById('page1').style.display = 'flex';
+    showPage('page1', false);
+  }
 
-if (savedName) {
-  currentName = savedName;
-  document.getElementById('greetingChip').textContent = '👤 ' + currentName;
-  document.getElementById('sumName').textContent = currentName;
-
-  showPage('page2', false);
-} else {
-  document.getElementById('page1').style.display = 'flex'; /* ✅ ADDED */
-  showPage('page1', false);
   function goToOrder() {
     currentName = nameInput.value.trim();
     if (!currentName) return;
+
     localStorage.setItem('bobaName', currentName);
     document.getElementById('greetingChip').textContent = '👤 ' + currentName;
     document.getElementById('sumName').textContent = currentName;
     updateSummary();
 
-      /* ✅ ADDED THIS BLOCK */
-  const p1 = document.getElementById('page1');
-  if (p1) p1.remove();
+    // remove page 1 completely
+    const p1 = document.getElementById('page1');
+    if (p1) p1.remove();
 
     showPage('page2', true);
   }
@@ -446,7 +449,10 @@ if (savedName) {
       const already = el.classList.contains('selected');
       document.querySelectorAll('.topping-item').forEach(x => x.classList.remove('selected'));
       order.toppings = [];
-      if (!already) { el.classList.add('selected'); order.toppings.push({ name: t.name, emoji: t.emoji }); }
+      if (!already) {
+        el.classList.add('selected');
+        order.toppings.push({ name: t.name, emoji: t.emoji });
+      }
       updateSummary();
     };
     document.getElementById('toppingsGrid').appendChild(el);
@@ -454,28 +460,39 @@ if (savedName) {
 
   function selectSugar(el, val) {
     document.querySelectorAll('.sugar-btn').forEach(b => b.classList.remove('selected'));
-    el.classList.add('selected'); order.sugar = val; updateSummary();
+    el.classList.add('selected');
+    order.sugar = val;
+    updateSummary();
   }
+
   function selectIce(el, val) {
     document.querySelectorAll('.ice-btn').forEach(b => b.classList.remove('selected'));
-    el.classList.add('selected'); order.ice = val; updateSummary();
+    el.classList.add('selected');
+    order.ice = val;
+    updateSummary();
   }
 
   function updateSummary() {
     document.getElementById('sumName').textContent = currentName || '—';
     document.getElementById('sumTea').textContent = order.tea || '— Choose a tea';
+
     const dairyNote = document.getElementById('sumDairyNote');
     if (order.tea) {
       dairyNote.style.display = 'block';
       dairyNote.textContent = order.isMilkTea ? '🥛 Contains non-dairy creamer' : '🍃 No dairy creamer';
       dairyNote.style.color = order.isMilkTea ? '#f0c040' : '#7ecfa0';
-    } else { dairyNote.style.display = 'none'; }
+    } else {
+      dairyNote.style.display = 'none';
+    }
+
     document.getElementById('sumSugar').textContent = order.sugar || '0% – No Sugar (default)';
     document.getElementById('sumIce').textContent = order.ice || 'Regular Ice (default)';
+
     const tEl = document.getElementById('sumToppings');
     tEl.innerHTML = order.toppings.length
       ? order.toppings.map(t => '<span class="summary-tag">' + t.emoji + ' ' + t.name + '</span>').join('')
       : '<span style="color:rgba(255,255,255,0.4);font-size:0.85rem">None</span>';
+
     document.getElementById('placeBtn').disabled = !order.tea;
   }
 
@@ -483,39 +500,56 @@ if (savedName) {
     document.getElementById('confirmName').textContent = currentName;
     document.getElementById('rcptName').textContent = currentName;
     document.getElementById('rcptTea').textContent = order.tea;
+
     const dairy = document.getElementById('rcptDairy');
     dairy.innerHTML = order.isMilkTea
       ? '<span class="dairy-pill milk-pill">🥛 Non-dairy creamer</span>'
       : '<span class="dairy-pill tea-only-pill">🍃 No dairy</span>';
+
     document.getElementById('rcptSugar').textContent = order.sugar || '0% – No Sugar';
     document.getElementById('rcptIce').textContent = order.ice || 'Regular Ice';
     document.getElementById('rcptToppings').textContent = order.toppings.length
       ? order.toppings.map(t => t.emoji + ' ' + t.name).join(', ')
       : 'None';
+
     const notes = document.getElementById('notes').value.trim();
     const notesRow = document.getElementById('rcptNotesRow');
-    if (notes) { document.getElementById('rcptNotes').textContent = notes; notesRow.style.display = 'block'; }
-    else { notesRow.style.display = 'none'; }
+    if (notes) {
+      document.getElementById('rcptNotes').textContent = notes;
+      notesRow.style.display = 'block';
+    } else {
+      notesRow.style.display = 'none';
+    }
+
     showPage('page3', true);
   }
 
   async function sendEmail() {
     const btn = document.getElementById('sendItBtn');
-    btn.disabled = true; btn.textContent = '📨 Sending...';
+    btn.disabled = true;
+    btn.textContent = '📨 Sending...';
+
     const tops = order.toppings.length ? order.toppings.map(t => t.name).join(', ') : 'None';
     const notes = document.getElementById('notes').value.trim();
     const sugar = order.sugar || '0% – No Sugar';
     const ice = order.ice || 'Regular Ice';
     const orderText = 'Name: ' + currentName + '\nTea: ' + order.tea + '\nSugar: ' + sugar + '\nIce: ' + ice + '\nToppings: ' + tops + (notes ? '\nNotes: ' + notes : '');
+
     try {
-      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_email: TO_EMAIL, order_list: orderText, order_count: 1, timestamp: new Date().toLocaleString() });
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        to_email: TO_EMAIL,
+        order_list: orderText,
+        order_count: 1,
+        timestamp: new Date().toLocaleString()
+      });
       showToast('📧 Order sent!');
-    } catch(err) {
+    } catch (err) {
       const body = encodeURIComponent(orderText);
       window.open('mailto:' + TO_EMAIL + '?subject=Boba Order – ' + currentName + '&body=' + body);
       showToast('📬 Opening your email app...');
     } finally {
-      btn.disabled = false; btn.textContent = 'Send it 🧋';
+      btn.disabled = false;
+      btn.textContent = 'Send it 🧋';
     }
   }
 
@@ -532,18 +566,26 @@ if (savedName) {
       p.classList.remove('active', 'slide-in');
       p.style.display = '';
     });
+
     const el = document.getElementById(id);
     el.classList.add('active');
+
     if (id === 'page3') el.style.display = 'flex';
     if (animate) el.classList.add('slide-in');
+
     window.scrollTo(0, 0);
   }
 
   function showToast(msg) {
     const t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
+    t.textContent = msg;
+    t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 3500);
   }
 </script>
+
+  *****************************
+
+ 
 </body>
 </html>
