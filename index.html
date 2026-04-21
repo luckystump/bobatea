@@ -394,16 +394,18 @@
   });
 
   // If name already saved, skip straight to order page
-  const savedName = localStorage.getItem('bobaName');
-  if (savedName) {
-    currentName = savedName;
-    document.getElementById('greetingChip').textContent = '👤 ' + currentName;
-    document.getElementById('sumName').textContent = currentName;
-    showPage('page2', false);
-  } else {
-    showPage('page1', false);
-  }
 
+const savedName = localStorage.getItem('bobaName');
+
+if (savedName) {
+  currentName = savedName;
+  document.getElementById('greetingChip').textContent = '👤 ' + currentName;
+  document.getElementById('sumName').textContent = currentName;
+
+  showPage('page2', false);
+} else {
+  document.getElementById('page1').style.display = 'flex'; /* ✅ ADDED */
+  showPage('page1', false);
   function goToOrder() {
     currentName = nameInput.value.trim();
     if (!currentName) return;
