@@ -413,6 +413,11 @@ if (savedName) {
     document.getElementById('greetingChip').textContent = '👤 ' + currentName;
     document.getElementById('sumName').textContent = currentName;
     updateSummary();
+
+      /* ✅ ADDED THIS BLOCK */
+  const p1 = document.getElementById('page1');
+  if (p1) p1.remove();
+
     showPage('page2', true);
   }
 
