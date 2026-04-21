@@ -581,6 +581,33 @@
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 3500);
   }
+
+    function showThankYouPage() {
+  const page3 = document.getElementById('page3');
+
+  page3.innerHTML = `
+    <div style="
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      padding:2rem;
+    ">
+      <h1 style="font-family:'Playfair Display', serif; font-size:2.5rem; margin-bottom:1rem;">
+        🎉 Thank You!
+      </h1>
+
+      <p style="font-size:1rem; opacity:0.7;">
+        We got your order.<br>
+        Sit tight 🧋
+      </p>
+    </div>
+  `;
+
+  showPage('page3', true);
+}
 </script>
 
 
